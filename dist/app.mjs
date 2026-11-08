@@ -239,7 +239,7 @@ function stepDemo(){
  demoTick++;render();
 }
 const helpText=`<ol><li>Mở Chrome hoặc Edge và chọn file debugger-…log hoặc theo dõi thư mục Debugger. Web kiểm tra mỗi 100 ms.</li><li>PTS cộng 1 điểm cho mỗi mạng hạ gục đã xác nhận. Khi trận kết thúc, web cộng điểm top theo thứ hạng xác định từ log.</li><li>ELIMS là tổng mạng hạ gục. Bảng tổng xếp theo PTS, rồi theo ELIMS. Đội mất đủ bốn người được đánh dấu ELIMINATED trong trận.</li><li>Điểm các trận kết thúc tự lưu trên trình duyệt. Chọn từng trận để đối chiếu thành viên hoặc xem điểm riêng.</li></ol>`;
-const obsText=`<ol><li>Mở <strong>START.cmd</strong> tại <code>E:/Tool/ĐIỂM</code>, giữ cửa sổ chạy này mở.</li><li>Trên trang <code>http://127.0.0.1:4173</code>, chọn thư mục Debugger và bấm <strong>Xuất bảng điểm</strong>.</li><li>Sao chép link vào <strong>OBS Browser Source</strong> hoặc <strong>vMix Web Browser</strong> trên cùng máy.</li><li>Đặt khung nguồn trình duyệt <strong>1920 × 1080</strong> để dùng toàn bộ khoảng chỉnh. Chỉnh bảng ở mục Kích thước overlay. Nền ngoài bảng trong suốt; chỉ xuất tên đội, logo, ELIMS, PTS và trạng thái ELIMINATED.</li><li>Giữ trang điều khiển đọc log mở. Chuyển trận, sửa tên/logo và điểm mới sẽ truyền sang link.</li></ol><p>Link nội bộ không đưa log lên mạng. Sau khi khởi động lại START.cmd, bấm Xuất bảng điểm trên trang điều khiển để nối lại. Trang hosted không tự truyền dữ liệu sang OBS; cần kết nối log ở trang chạy tại máy.</p>`;
+const obsText=`<ol><li>Mở <strong>START.cmd</strong> tại <code>E:/Tool/ĐIỂM</code>, giữ cửa sổ chạy này mở.</li><li>Trên trang <code>http://127.0.0.1:4173</code>, chọn thư mục Debugger và bấm <strong>Xuất bảng điểm</strong>.</li><li>Sao chép link vào <strong>OBS Browser Source</strong> hoặc <strong>vMix Web Browser</strong> trên cùng máy.</li><li>Đặt khung nguồn trình duyệt <strong>1920 × 1080</strong> để dùng toàn bộ khoảng chỉnh. Chỉnh bảng ở mục Kích thước overlay. Nền ngoài bảng trong suốt; chỉ xuất tên đội, logo, ELIMS, PTS và trạng thái ELIMINATED.</li><li>Giữ trang điều khiển đọc log mở. Chuyển trận, sửa tên/logo và điểm mới sẽ truyền sang link.</li></ol><p>Link nội bộ không đưa log lên mạng. Sau khi khởi động lại START.cmd, bấm Xuất OBS/vMix trên trang điều khiển để nối lại. Trang hosted không tự truyền dữ liệu sang OBS; cần kết nối log ở trang chạy tại máy.</p>`;
 function openHelp(obs=false){$('helpContent').innerHTML=obs?obsText:helpText;$('helpDialog').querySelector('h2').textContent=obs?'Đưa bảng điểm lên OBS':'Từ file log đến bảng điểm';$('helpDialog').showModal();}
 $('cancelTeamEdit').addEventListener('click',()=>$('teamEditDialog').close());
 $('teamEditDialog').addEventListener('close',()=>{if(pendingEditLogo)URL.revokeObjectURL(pendingEditLogo);pendingEditLogo=null;editTarget=null;});
@@ -279,13 +279,13 @@ $('exportBtn').addEventListener('click',()=>{
  if(!visibleBoard?.teams.length){notify('Chưa có đội để xuất. Bảng điểm sẽ sẵn sàng khi log có danh sách đội.');return;}
  tabPublisher.enable();render();$('tabOverlayLink').href=tabURL;$('tabOverlayLink').hidden=false;
  const opened=window.open(tabURL,'_blank');if(opened)opened.opener=null;
- $('overlayStatus').textContent='Bảng điểm riêng đang đồng bộ · '+(opened?'đã mở tab mới':'bấm Mở lại bảng điểm nếu tab bị chặn');
+ $('overlayStatus').textContent=opened?'Đã mở tab xem trước. Dùng Xuất OBS/vMix để lấy link Browser Source.':'Bấm Mở lại tab xem trước nếu trình duyệt chặn tab mới.';
  if(['127.0.0.1','localhost'].includes(location.hostname))void overlayPublisher.enable().then(()=>render()).catch(()=>{});
 });
 $('exportOptionsBtn').addEventListener('click',async()=>{
  $('exportDialog').showModal();const local=['127.0.0.1','localhost'].includes(location.hostname);
  $('exportLocal').hidden=!local;$('exportHosted').hidden=local;
- if(!local){$('exportStatus').textContent='Link OBS/vMix dùng bản chạy trên máy để nhận dữ liệu đọc từ file.';return;}
+ if(!local){$('exportStatus').textContent='Bạn đang mở bản web Render. Hãy dùng trang điều khiển tại máy để gửi dữ liệu sang OBS/vMix.';return;}
  $('exportURL').value=location.origin+'/overlay.html';$('exportPreview').href=$('exportURL').value;
  try{$('exportStatus').textContent='Đang kết nối bộ xuất tại máy…';await overlayPublisher.enable();render();}
  catch{$('exportStatus').textContent='Chưa kết nối được bộ xuất. Chạy START.cmd của bản mới rồi mở lại trang.';}

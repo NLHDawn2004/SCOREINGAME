@@ -12,7 +12,7 @@ export class OverlayPublisher{
    const state=validateOverlayState({teams,kv,size:input.size});const json=JSON.stringify(state);
    if(json!==this.lastJSON||Date.now()-this.lastSent>=1000){const r=await fetch('/api/scoreboard',{method:'POST',headers:{Authorization:'Bearer '+this.token,'Content-Type':'application/json'},body:json});if(!r.ok){if(r.status===403)await this.enable();throw Error('Chưa truyền được bảng điểm');}this.lastJSON=json;this.lastSent=Date.now();this.sent=new Set([...state.teams.map(t=>t.logo),state.kv?.atlas,state.kv?.header].filter(Boolean));}
    const usedURLs=new Set([...input.teams.map(t=>t.logoSrc),input.kv?.atlas,input.kv?.header]);for(const url of this.assets.keys())if(!usedURLs.has(url))this.assets.delete(url);
-   this.onStatus(missing?'Đang xuất bảng · '+missing+' logo chưa truyền được':'Đang xuất trực tiếp · '+(state.size?.width??350)+' × '+(state.size?.height??730)+' px');
+   this.onStatus(!state.teams.length?'Đã kết nối OBS/vMix · chờ dữ liệu đội từ file debug':missing?'Đang xuất bảng · '+missing+' logo chưa truyền được':'Đang xuất trực tiếp · '+(state.size?.width??350)+' × '+(state.size?.height??730)+' px');
   }}catch{this.onStatus('Đang kết nối lại bộ xuất · giữ bảng gần nhất');clearTimeout(this.retry);this.retry=setTimeout(()=>{this.pending=this.latest;if(!this.running)void this.drain();},1200);}
   finally{this.running=false;}
  }
