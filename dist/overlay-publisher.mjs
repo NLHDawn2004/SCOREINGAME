@@ -21,7 +21,7 @@ export class OverlayPublisher{
   return this.id;
  }
  update(state){this.latest=state;if(!this.active)return;this.pending=state;if(!this.running)void this.drain();}
- async logo(url){if(!url)return null;let a=this.assets.get(url);if(!a){const blob=await(await fetch(url)).blob();const bytes=await blob.arrayBuffer();const hash=await crypto.subtle.digest('SHA-256',bytes);const id=[...new Uint8Array(hash)].map(n=>n.toString(16).padStart(2,'0')).join('');a={id,blob};this.assets.set(url,a);}if(!this.sent.has(a.id)){const r=await fetch(this.api+'/logo/'+a.id,{method:'POST',headers:{Authorization:'Bearer '+this.token,'Content-Type':a.blob.type||'image/png'},body:a.blob});if(!r.ok)throw Error('Không xuất được logo');this.sent.add(a.id);}return a.id;}
+ async logo(url){if(!url)return null;let a=this.assets.get(url);if(!a){const blob=await(await fetch(url)).blob();const bytes=await blob.arrayBuffer();const hash=await crypto.subtle.digest('SHA-256',bytes);const id=[...new Uint8Array(hash)].map(n=>n.toString(16).padStart(2,'0')).join('');a={id,blob};this.assets.set(url,a);}if(!this.sent.has(a.id)){const r=await fetch(this.api+'/logo/'+a.id,{method:'POST',headers:{Authorization:'Bearer '+this.token,'Content-Type':a.blob.type||'image/png'},body:a.blob});if(!r.ok){if(this.hosted&&r.status===404)await this.enable();throw Error('Không xuất được logo');}this.sent.add(a.id);}return a.id;}
  rowKey(id){
   if(!this.hosted||!id)return id;
   if(!this.rowKeys.has(id))this.rowKeys.set(id,crypto.randomUUID());
