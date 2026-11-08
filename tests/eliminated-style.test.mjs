@@ -1,0 +1,3 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {teamEliminated} from '../dist/alive-bars.mjs';
+test('only four confirmed dead players eliminate a team',()=>{const dead=()=>({alive:false,status:'dead'});assert.equal(teamEliminated(Array.from({length:4},dead)),true);assert.equal(teamEliminated(Array.from({length:3},dead)),false);assert.equal(teamEliminated([]),false);assert.equal(teamEliminated([...Array.from({length:3},dead),{alive:true,status:'knocked'}]),false);assert.equal(teamEliminated([...Array.from({length:3},dead),{alive:true,status:'alive'}]),false);});
