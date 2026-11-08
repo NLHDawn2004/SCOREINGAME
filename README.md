@@ -1,3 +1,7 @@
+# FF Live Score v1.36
+
+Bản Web Service trên Render hỗ trợ **Xuất OBS/vMix** qua mạng. Triển khai từ nhánh main với Runtime Node, Build Command `true`, Start Command `node serve.mjs` và Health Check Path `/healthz`. Render tự cung cấp `RENDER_EXTERNAL_HOSTNAME` và `PORT`. Khi chạy START.cmd, bản tại máy tiếp tục dùng cổng 4173.
+
 # FF Live Score v1.32
 
 Bấm **Đọc KV** và chọn thư mục HUD_PIC. Tool tự tìm ảnh nền hàng và tiêu đề PNG phù hợp, rồi dùng chúng cho bảng dọc. Thiếu ảnh tiêu đề thì dùng tiêu đề mặc định.

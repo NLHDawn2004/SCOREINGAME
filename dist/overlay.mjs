@@ -37,9 +37,11 @@ function paint(state,images,kvImages){
  }).join('');
  paintRows(document.querySelector('#rows'),rows,'overlay');
 }
-async function tick(){if(busy)return;busy=true;try{const r=await fetch('/api/scoreboard',{cache:'no-store'});if(!r.ok)return;const state=validateOverlayState(await r.json());const json=JSON.stringify(state);if(json===previous)return;
+const liveID=new URLSearchParams(location.search).get('live');
+const api=/^[a-f0-9]{32}$/.test(liveID??'')?'/api/live/'+liveID:'/api';
+async function tick(){if(busy)return;busy=true;try{const r=await fetch(api+'/scoreboard',{cache:'no-store'});if(!r.ok)return;const state=validateOverlayState(await r.json());const json=JSON.stringify(state);if(json===previous)return;
  const used=new Set([...state.teams.map(t=>t.logo),state.kv?.atlas,state.kv?.header].filter(Boolean));
- for(const id of used)if(!cache.has(id)){try{const image=await fetch('/api/logo/'+id,{cache:'no-store'});if(image.ok)cache.set(id,URL.createObjectURL(await image.blob()));}catch{}}
+ for(const id of used)if(!cache.has(id)){try{const image=await fetch(api+'/logo/'+id,{cache:'no-store'});if(image.ok)cache.set(id,URL.createObjectURL(await image.blob()));}catch{}}
  paint(state);for(const [id,url]of cache)if(!used.has(id)){URL.revokeObjectURL(url);cache.delete(id);}previous=[...used].every(id=>cache.has(id))?json:'';
  }catch{}finally{busy=false;}}
 const tabID=new URLSearchParams(location.search).get('tab');
@@ -51,4 +53,4 @@ if(tabID){
  const kvImages=state.kv?{atlas:ownBlob(e.data.kvImages?.atlas),header:ownBlob(e.data.kvImages?.header)}:null;
  const json=JSON.stringify([state,images,kvImages]);if(json!==previous){paint(state,images,kvImages);previous=json;}}catch{}};
  channel.postMessage({type:'request'});setInterval(()=>channel.postMessage({type:'request'}),1000);
-}else{setInterval(tick,100);tick();}
+}else{setInterval(tick,liveID?500:100);tick();}

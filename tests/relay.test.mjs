@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {once} from 'node:events';
+import http from 'node:http';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
@@ -43,4 +44,34 @@ test('KV assets stay available to OBS while selected and are released when remov
  assert.equal((await update({teams:[],kv:{...kv,bands:[[7,51],[50,99]]}})).status,400);
  assert.equal((await update({teams:[]})).status,200);
  for(const id of ids)assert.equal((await fetch(origin+'/api/logo/'+id)).status,404);
+});
+
+test('hosted overlay isolates links, hides tokens, and rejects cross-session writes', async t => {
+ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../dist');
+ const server=createScoreServer(root,{hosted:true,publicHost:'scoreingame.example'});
+ server.listen(0,'127.0.0.1');await once(server,'listening');
+ t.after(()=>new Promise(resolve=>server.close(resolve)));
+ const origin='http://127.0.0.1:'+server.address().port;
+ const request=(url,opts={})=>new Promise((resolve,reject)=>{
+  const req=http.request(origin+url,{...opts,headers:{Host:'scoreingame.example',...opts.headers}},async res=>{
+   const chunks=[];for await(const chunk of res)chunks.push(chunk);
+   resolve(new Response(Buffer.concat(chunks),{status:res.statusCode,headers:res.headers}));
+  });
+  req.on('error',reject);req.end(opts.body);
+ });
+ const create=()=>request('/api/session',{method:'POST'}).then(r=>r.json());
+ const first=await create(),second=await create();
+ const resume=await request('/api/session',{method:'POST',headers:{Authorization:'Bearer '+first.token}});
+ assert.deepEqual(await resume.json(),first);
+ assert.match(first.id,/^[a-f0-9]{32}$/);
+ assert.notEqual(first.id,second.id);
+ const board=id=>'/api/live/'+id+'/scoreboard';
+ const state={teams:[{name:'SWT',pts:25,elims:18,logo:null}]};
+ const write=(id,token)=>request(board(id),{method:'POST',headers:{Authorization:'Bearer '+token},body:JSON.stringify(state)});
+ assert.equal((await write(first.id,second.token)).status,403);
+ assert.equal((await write(first.id,first.token)).status,200);
+ assert.deepEqual(await (await request(board(first.id))).json(),state);
+ assert.deepEqual(await (await request(board(second.id))).json(),{teams:[]});
+ assert.equal((await request('/api/session')).status,404);
+ assert.equal((await request('/api/session',{method:'POST',headers:{Origin:'https://other.example'}})).status,403);
 });
