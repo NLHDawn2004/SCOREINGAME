@@ -11,7 +11,7 @@ import {LogParser} from './parser.mjs';
 import {FileTailer} from './tailer.mjs';
 import {demoSeed} from './demo.mjs';
 import {LiveReader} from './live-reader.mjs';
-import {DirectoryLogSource,isDebugLogName} from './directory-source.mjs';
+import {DirectoryLogSource,isDebugLogName} from './debug-log-directory.mjs';
 const $=id=>document.getElementById(id);
 const cprKey='ff-live-score-cpr-threshold-v1';
 let cprThreshold=null;

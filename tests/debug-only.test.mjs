@@ -1,4 +1,4 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
-import {DirectoryLogSource,isDebugLogName} from '../dist/directory-source.mjs';
+import {DirectoryLogSource,isDebugLogName} from '../dist/debug-log-directory.mjs';
 test('only debugger timestamp log filenames are accepted for file and directory selection',()=>{assert.equal(isDebugLogName('debugger-2026-11-03T14-00-00.log'),true);for(const n of ['Player.log','player.log','Player-prev.log','notes.txt','random.log'])assert.equal(isDebugLogName(n),false);});
 test('mixed directory never reads Unity logs even when they are present',async()=>{let playerReads=0;const dir={async *values(){yield {kind:'file',name:'Player.log',getFile:async()=>{playerReads++;return new File(['player'],'Player.log');}};yield {kind:'file',name:'debugger-2026-11-03T14-00-00.log',getFile:async()=>new File(['debug'],'debugger-2026-11-03T14-00-00.log')};}};assert.equal((await new DirectoryLogSource(dir).getFile()).name,'debugger-2026-11-03T14-00-00.log');assert.equal(playerReads,0);});

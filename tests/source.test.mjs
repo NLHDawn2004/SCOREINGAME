@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {DirectoryLogSource} from '../dist/directory-source.mjs';
+import {DirectoryLogSource} from '../dist/debug-log-directory.mjs';
 import {LiveReader} from '../dist/live-reader.mjs';
 import {LogParser} from '../dist/parser.mjs';
 import {FileTailer} from '../dist/tailer.mjs';

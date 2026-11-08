@@ -1,5 +1,5 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
-import {LogParser} from '../dist/parser.mjs';import {FileTailer} from '../dist/tailer.mjs';import {DirectoryLogSource} from '../dist/directory-source.mjs';
+import {LogParser} from '../dist/parser.mjs';import {FileTailer} from '../dist/tailer.mjs';import {DirectoryLogSource} from '../dist/debug-log-directory.mjs';
 const line=(s,frame=1)=>`[2026-11-03 13:58:12.000][1][${frame}] ${s}\n`;
 const start=line('Join Match Result, ERR_NONE'),add=(id,team)=>line(`[UIModelSpectator] AddPlayer id${id},nameP${id},gsTeam${team}`);
 test('Unity Player logs are rejected as directory sources',async()=>{const files=[new File(['old'],'Player-prev.log'),new File(['current'],'Player.log')];const dir={async *values(){for(const file of files)yield {kind:'file',name:file.name,getFile:async()=>file};}};await assert.rejects(new DirectoryLogSource(dir).getFile(),/debugger/);});
